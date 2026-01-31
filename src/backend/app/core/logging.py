@@ -1,12 +1,12 @@
 import os
 from loguru import logger
-from app.core.config import settings
+from src.backend.app.core.config import settings
 
 logger.remove()
 
 LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
 
-LOF_FORMAT = (
+LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
     "<level>{level: <8}</level> | "
     "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "

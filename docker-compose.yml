@@ -13,3 +13,19 @@ services:
       - .:/app
     restart: unless-stopped
     command: uvicorn src.backend.app.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-bullseye
+    container_name: banking_postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
