@@ -1,4 +1,16 @@
 services:
+  traefik:
+    image: docker.io/traefik:v3.2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+    command: --providers.docker
+    
+
   app:
     build:
       context: .
@@ -15,6 +27,27 @@ services:
     command: uvicorn src.backend.app.main:app --host 0.0.0.0 --port 8000
     depends_on:
       - postgres
+      - mailpit
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.banking-project.entrypoints=web"
+      - "traefik.http.routers.banking-project.rule=Host(`banking-project.localhost`)"
+      - "traefik.http.routers.banking-project.service=banking-project"
+      - "traefik.http.services.banking-project.loadbalancer.server.port=8000"
+      - "traefik.http.services.banking-project.loadbalancer.server.scheme=http"
+    
+  mailpit:
+    image: docker.io/axllent/mailpit:v1.20.3
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    volumes:
+      - banking_mailpit_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATA_FILE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
 
   postgres:
     image: postgres:16-bullseye
@@ -29,3 +62,5 @@ services:
 
 volumes:
   postgres_data:
+  banking_mailpit_data:
+
